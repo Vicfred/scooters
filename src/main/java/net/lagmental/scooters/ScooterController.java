@@ -17,15 +17,13 @@ public class ScooterController {
     @PostMapping(path = "/create", consumes = "application/json", produces = "application/json")
     public Scooter create(@RequestBody Scooter scooter) {
         String scooterid = scooter.getScooterid();
-        String email = scooter.getEmail();
-        jdbcTemplate.update("INSERT INTO scooters VALUES (?, ?, ?)", scooterid, email, "CREATED");
-        return new Scooter(scooterid, email, "CREATED");
+        jdbcTemplate.update("INSERT INTO scooters VALUES (?, ?, ?)", scooterid, "CREATED");
+        return new Scooter(scooterid, "CREATED");
     }
 
     @PostMapping(path = "/setup", consumes = "application/json", produces = "application/json")
     public Scooter setup(@RequestBody Scooter scooter) {
         String scooterid = scooter.getScooterid();
-        String email = scooter.getEmail();
         String status = jdbcTemplate.queryForObject("SELECT status FROM scooters WHERE scooterid = ?",
                 new Object[]{scooterid}, String.class);
 
@@ -37,6 +35,6 @@ public class ScooterController {
 
         jdbcTemplate.update("UPDATE scooters SET status=? where scooterid = ?", "MAINTENANCE", scooterid);
 
-        return new Scooter(scooterid, email, "MAINTENANCE");
+        return new Scooter(scooterid, "MAINTENANCE");
     }
 }

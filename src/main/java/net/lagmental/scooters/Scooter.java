@@ -8,6 +8,5 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class Scooter {
     private final String scooterid;
-    private String email;
     private String status;
 }
