@@ -2,10 +2,14 @@ package net.lagmental.scooters;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Timestamp;
 
 @RestController
 @Slf4j
@@ -15,26 +19,61 @@ public class ScooterController {
     JdbcTemplate jdbcTemplate;
 
     @PostMapping(path = "/create", consumes = "application/json", produces = "application/json")
-    public Scooter create(@RequestBody Scooter scooter) {
-        String scooterid = scooter.getScooterid();
-        jdbcTemplate.update("INSERT INTO scooters VALUES (?, ?, ?)", scooterid, "CREATED");
-        return new Scooter(scooterid, "CREATED");
+    public Result create(@RequestBody Event event) {
+        final String scooterId = event.getScooterId();
+        final String email = event.getEmail();
+
+        if(scooterId == null || email == null) {
+            return new Result(null, "INVALID DATA");
+        }
+
+        try {
+            jdbcTemplate.update("INSERT INTO scooters VALUES (?, ?)", scooterId, "CREATED");
+            jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?)",
+                    "create", email, "INITIAL", "CREATED", new Timestamp(System.currentTimeMillis()));
+
+            return new Result(scooterId, "CREATED");
+        } catch (DuplicateKeyException dupEx) {
+            // if the scooter already exists we just return it
+            log.info("duplicated key {}", scooterId);
+
+            String status = jdbcTemplate.queryForObject("SELECT status FROM scooters WHERE scooterid = ?",
+                new Object[]{scooterId}, String.class);
+
+            return  new Result(scooterId, status);
+        }
     }
 
     @PostMapping(path = "/setup", consumes = "application/json", produces = "application/json")
-    public Scooter setup(@RequestBody Scooter scooter) {
-        String scooterid = scooter.getScooterid();
-        String status = jdbcTemplate.queryForObject("SELECT status FROM scooters WHERE scooterid = ?",
-                new Object[]{scooterid}, String.class);
+    public Result setup(@RequestBody Event event) {
+        final String scooterId = event.getScooterId();
+        final String email = event.getEmail();
+        assert scooterId != null;
+        assert email != null;
 
-        // TODO think how to handle the error
-        if("CREATED" != status) {
-            log.info("invalid status");
-            return null;
+        if(scooterId == null || email == null) {
+            return new Result(null, "INVALID DATA");
         }
 
-        jdbcTemplate.update("UPDATE scooters SET status=? where scooterid = ?", "MAINTENANCE", scooterid);
+        String status;
 
-        return new Scooter(scooterid, "MAINTENANCE");
+        try {
+            status = jdbcTemplate.queryForObject("SELECT status FROM scooters WHERE scooterid = ?",
+                    new Object[]{scooterId}, String.class);
+        } catch (EmptyResultDataAccessException ex) {
+            log.info("scooter {} not found", scooterId);
+            return new Result(scooterId, "INVALID ID");
+        }
+
+        if(!status.equals("CREATED")) {
+            log.info("invalid status");
+            return new Result(scooterId, "INVALID STATUS");
+        }
+
+        jdbcTemplate.update("UPDATE scooters SET status=? where scooterid = ?", "MAINTENANCE", scooterId);
+        jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?)",
+                "setup", email, "CREATED", "MAINTENANCE", new Timestamp(System.currentTimeMillis()));
+
+        return new Result(scooterId, "MAINTENANCE");
     }
 }
