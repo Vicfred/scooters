@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.1.8.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
+    id 'groovy'
 }
 
 group = 'net.lagmental'
@@ -25,9 +26,12 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+    testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.5'
 }
