@@ -1,6 +1,11 @@
 # scooters api
 
-## Instruction to run
+##
+The main business logic of the code is in [ScooterController.java](src/main/java/net/lagmental/scooters/ScooterController.java)
+
+The code for the tests is in [ScooterControllerTest.groovy](src/test/groovy/net/lagmental/scooters/ScooterControllerTest.groovy)
+
+## Instructions to run
 
 ### Requirements
 - Java 8+
@@ -18,7 +23,7 @@ git clone https://github.com/Vicfred/scooters.git
 cd scooters
 ```
 
-#### use the included gradle wrapper to run the application
+#### use the included gradle wrapper to run the application (this can take some time depending on your internet)
 ```
 ./gradlew bootrun
 ```
