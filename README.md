@@ -24,6 +24,10 @@ cd scooters
 ```
 ![spring](https://raw.githubusercontent.com/Vicfred/scooters/master/img/spring.png "Spring")
 
+the application will now run on port 8080
+
+![postman](https://raw.githubusercontent.com/Vicfred/scooters/master/img/postman.png "Postman")
+
 #### you can run the tests with
 ```
 ./gradlew test
