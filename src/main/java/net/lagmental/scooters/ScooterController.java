@@ -80,21 +80,21 @@ public class ScooterController {
 
     @PostMapping(path = "/moving", consumes = "application/json", produces = "application/json")
     public Result moving(@RequestBody Event event) {
-        return processRequest(event, "MAINTENANCE", "DISTRIBUTING", "setup");
+        return processRequest(event, "MAINTENANCE", "DISTRIBUTING", "moving");
     }
 
     @PostMapping(path = "/placed", consumes = "application/json", produces = "application/json")
     public Result placed(@RequestBody Event event) {
-        return processRequest(event, "DISTRIBUTING", "ONSTREET", "setup");
+        return processRequest(event, "DISTRIBUTING", "ONSTREET", "placed");
     }
 
     @PostMapping(path = "/repair", consumes = "application/json", produces = "application/json")
     public Result repair(@RequestBody Event event) {
-        return processRequest(event, "ONSTREET", "MAINTENANCE", "setup");
+        return processRequest(event, "ONSTREET", "MAINTENANCE", "needs repair");
     }
 
     @PostMapping(path = "/movefromstreet", consumes = "application/json", produces = "application/json")
     public Result movefromstreet(@RequestBody Event event) {
-        return processRequest(event, "ONSTREET", "DISTRIBUTING", "setup");
+        return processRequest(event, "ONSTREET", "DISTRIBUTING", "moving");
     }
 }
