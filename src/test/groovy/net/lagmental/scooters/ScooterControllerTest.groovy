@@ -4,7 +4,6 @@ import groovyx.net.http.RESTClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import spock.lang.Shared
 import spock.lang.Specification
 
 @SpringBootTest(
@@ -63,7 +62,7 @@ class ScooterControllerTest extends Specification {
         deleteTestScooter(testid)
     }
 
-    def 'User should be able to change from maintenance to distributing' () {
+    def 'User should be able to change from maintenance to distributing'() {
         given:
         restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
         restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
@@ -72,9 +71,65 @@ class ScooterControllerTest extends Specification {
         def response = restClient.post(path: '/moving', body: requestBody, requestContentType: 'application/json')
 
         then:
-        200 == response.status
-        "ZYXW" == response.responseData["scooterId"]
-        "DISTRIBUTING" == response.responseData["result"]
+        200             == response.status
+        "ZYXW"          == response.responseData["scooterId"]
+        "DISTRIBUTING"  == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def 'User should be able to change from distributing to on street'() {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/moving', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/placed', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200         == response.status
+        "ZYXW"      == response.responseData["scooterId"]
+        "ONSTREET"  == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def 'User should be able to change from on street to maintenance'() {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/moving', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/placed', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/repair', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200         == response.status
+        "ZYXW"      == response.responseData["scooterId"]
+        "MAINTENANCE"  == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def 'User should be able to change from on street to distributing'() {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/moving', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/placed', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/movefromstreet', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200         == response.status
+        "ZYXW"      == response.responseData["scooterId"]
+        "DISTRIBUTING"  == response.responseData["result"]
 
         cleanup:
         deleteTestScooter(testid)
