@@ -14,19 +14,56 @@ import spock.lang.Specification
 @ActiveProfiles(value = "test")
 @ContextConfiguration
 class ScooterControllerTest extends Specification {
-    @Shared
     RESTClient restClient = new RESTClient("http://localhost:8080")
+    def testid = 'ZYXW'
+    def testmail = 'vicfred.test@lagmental.net'
+    def requestBody = [scooterId: testid, email: testmail]
 
     def 'User should be able to perform create request'() {
-        given:
-        def requestBody = [scooterId: 'ZYXW', email: 'vicfred.test@gmail.com']
-
         when:
         def response = restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
 
         then:
-        response.status == 200
-        response.responseData["scooterId"] == "ZYXW"
-        response.responseData["result"] == "CREATED"
+        200         == response.status
+        "ZYXW"      == response.responseData["scooterId"]
+        "CREATED"   == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def 'User should be able to change from a created to maintenance'() {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200             == response.status
+        "ZYXW"          == response.responseData["scooterId"]
+        "MAINTENANCE"   == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def 'User should NOT be able to change directly from a state to another'() {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/placed', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200                 == response.status
+        "INVALID STATUS"    == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
+    def deleteTestScooter(scooterId) {
+        return restClient.delete(path: '/delete/'+scooterId)
     }
 }
