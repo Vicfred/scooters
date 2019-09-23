@@ -63,6 +63,23 @@ class ScooterControllerTest extends Specification {
         deleteTestScooter(testid)
     }
 
+    def 'User should be able to change from maintenance to distributing' () {
+        given:
+        restClient.post(path: '/create', body: requestBody, requestContentType: 'application/json')
+        restClient.post(path: '/setup', body: requestBody, requestContentType: 'application/json')
+
+        when:
+        def response = restClient.post(path: '/moving', body: requestBody, requestContentType: 'application/json')
+
+        then:
+        200 == response.status
+        "ZYXW" == response.responseData["scooterId"]
+        "DISTRIBUTING" == response.responseData["result"]
+
+        cleanup:
+        deleteTestScooter(testid)
+    }
+
     def deleteTestScooter(scooterId) {
         return restClient.delete(path: '/delete/'+scooterId)
     }
