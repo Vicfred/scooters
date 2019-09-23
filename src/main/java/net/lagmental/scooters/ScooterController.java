@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 
@@ -96,5 +94,11 @@ public class ScooterController {
     @PostMapping(path = "/movefromstreet", consumes = "application/json", produces = "application/json")
     public Result movefromstreet(@RequestBody Event event) {
         return processRequest(event, "ONSTREET", "DISTRIBUTING", "moving");
+    }
+
+    @DeleteMapping(path = "/delete/{id}", produces = "application/json")
+    public Result delete(@PathVariable String id) {
+        jdbcTemplate.update("DELETE FROM scooters WHERE scooterid = ?", new Object[] {id});
+        return new Result(id, "DELETED");
     }
 }
