@@ -29,8 +29,8 @@ public class ScooterController {
 
         try {
             jdbcTemplate.update("INSERT INTO scooters VALUES (?, ?)", scooterId, "CREATED");
-            jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?)",
-                    "create", email, "INITIAL", "CREATED", new Timestamp(System.currentTimeMillis()));
+            jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?)", scooterId, "create", email,
+                    "INITIAL", "CREATED", new Timestamp(System.currentTimeMillis()));
 
             return new Result(scooterId, "CREATED");
         } catch (DuplicateKeyException dupEx) {
@@ -44,16 +44,12 @@ public class ScooterController {
         }
     }
 
-    @PostMapping(path = "/setup", consumes = "application/json", produces = "application/json")
-    public Result setup(@RequestBody Event event) {
+    private Result processRequest(Event event, String oldState, String newState, String action) {
         final String scooterId = event.getScooterId();
         final String email = event.getEmail();
-        assert scooterId != null;
-        assert email != null;
 
-        if(scooterId == null || email == null) {
+        if(null == scooterId || null == email)
             return new Result(null, "INVALID DATA");
-        }
 
         String status;
 
@@ -65,15 +61,20 @@ public class ScooterController {
             return new Result(scooterId, "INVALID ID");
         }
 
-        if(!status.equals("CREATED")) {
-            log.info("invalid status");
+        if(!status.equals(oldState)) {
+            log.info("invalid status {}", oldState);
             return new Result(scooterId, "INVALID STATUS");
         }
 
-        jdbcTemplate.update("UPDATE scooters SET status=? where scooterid = ?", "MAINTENANCE", scooterId);
-        jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?)",
-                "setup", email, "CREATED", "MAINTENANCE", new Timestamp(System.currentTimeMillis()));
+        jdbcTemplate.update("UPDATE scooters SET status=? where scooterid = ?", newState, scooterId);
+        jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?)",
+                scooterId, action, email, oldState, newState, new Timestamp(System.currentTimeMillis()));
 
         return new Result(scooterId, "MAINTENANCE");
+    }
+
+    @PostMapping(path = "/setup", consumes = "application/json", produces = "application/json")
+    public Result setup(@RequestBody Event event) {
+        return processRequest(event, "CREATED", "MAINTENANCE", "setup");
     }
 }
