@@ -68,7 +68,7 @@ public class ScooterController {
         jdbcTemplate.update("INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?)",
                 scooterId, action, email, oldState, newState, new Timestamp(System.currentTimeMillis()));
 
-        return new Result(scooterId, "MAINTENANCE");
+        return new Result(scooterId, newState);
     }
 
     @PostMapping(path = "/setup", consumes = "application/json", produces = "application/json")
