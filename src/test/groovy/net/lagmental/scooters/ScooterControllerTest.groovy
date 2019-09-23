@@ -108,9 +108,9 @@ class ScooterControllerTest extends Specification {
         def response = restClient.post(path: '/repair', body: requestBody, requestContentType: 'application/json')
 
         then:
-        200         == response.status
-        "ZYXW"      == response.responseData["scooterId"]
-        "MAINTENANCE"  == response.responseData["result"]
+        200             == response.status
+        "ZYXW"          == response.responseData["scooterId"]
+        "MAINTENANCE"   == response.responseData["result"]
 
         cleanup:
         deleteTestScooter(testid)
@@ -127,8 +127,8 @@ class ScooterControllerTest extends Specification {
         def response = restClient.post(path: '/movefromstreet', body: requestBody, requestContentType: 'application/json')
 
         then:
-        200         == response.status
-        "ZYXW"      == response.responseData["scooterId"]
+        200             == response.status
+        "ZYXW"          == response.responseData["scooterId"]
         "DISTRIBUTING"  == response.responseData["result"]
 
         cleanup:
